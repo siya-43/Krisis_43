@@ -119,11 +119,11 @@ const mockStore = {
 function defaultCameraRegistry() {
   const presets = {
     "cam-01": { source: "0", location: "Lobby" },
-    "cam-02": { source: "demo/lobbycam.mp4", location: "Reception" },
-    "cam-03": { source: "demo/kitchencam.mp4", location: "Kitchen" },
-    "cam-04": { source: "demo/corridorCam.mp4", location: "Corridor A" },
-    "cam-05": { source: "demo/banquet hall.mp4", location: "Banquet Hall" },
-    "cam-06": { source: "demo/stairscCamm.mp4", location: "Stairwell" },
+    "cam-02": { source: "./lobbycam.mp4", location: "Reception" },
+    "cam-03": { source: "./kitchencam.mp4", location: "Kitchen" },
+    "cam-04": { source: "./corridorCam.mp4", location: "Corridor A" },
+    "cam-05": { source: "./banquet hall.mp4", location: "Banquet Hall" },
+    "cam-06": { source: "./stairscCamm.mp4", location: "Stairwell" },
   };
 
   return CAMERA_UNITS.reduce((acc, camera) => {
