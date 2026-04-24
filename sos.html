@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Crisis Grid | SOS Portal</title>
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#0a0a0a">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/595/595067.png">
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #1a1a1a;
+      --text: #ffffff;
+      --fire: #ff4d4d;
+      --medical: #4d94ff;
+      --security: #ffcc00;
+      --accent: #00ff88;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    header {
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid #333;
+    }
+
+    h1 { font-size: 11px; margin: 0; letter-spacing: 2px; text-transform: uppercase; color: #888; }
+    .location-banner { font-size: 18px; font-weight: 800; margin-top: 5px; color: var(--accent); }
+
+    .sos-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .sos-btn {
+      flex: 1;
+      border: none;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    .sos-btn:active { transform: scale(0.95); }
+    .sos-btn i { font-size: 40px; }
+    .sos-btn span { font-size: 24px; font-weight: 900; text-transform: uppercase; }
+
+    .sos-btn.fire { background: var(--fire); }
+    .sos-btn.medical { background: var(--medical); }
+    .sos-btn.security { background: var(--security); color: #000; }
+
+    /* Overlays */
+    #preOverlay, #overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.98);
+      display: none;
+      flex-direction: column;
+      padding: 20px;
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #preOverlay.active, #overlay.active { display: flex; }
+
+    .countdown-circle {
+      width: 150px;
+      height: 150px;
+      border: 8px solid var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 60px;
+      font-weight: 900;
+      margin-bottom: 30px;
+      color: var(--accent);
+    }
+
+    .pre-msg { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 40px; color: #fff; }
+    
+    .btn-cancel-large {
+      background: #333;
+      color: white;
+      border: none;
+      padding: 20px 60px;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .timer-bar {
+      height: 5px;
+      background: #222;
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      overflow: hidden;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+
+    #timerProgress {
+      height: 100%;
+      background: var(--accent);
+      width: 100%;
+      transition: width 1s linear;
+    }
+
+    .step-header { text-align: center; margin-bottom: 20px; width: 100%; }
+    .step-header .status { font-size: 18px; font-weight: 800; color: var(--accent); display: block; margin-bottom: 5px; }
+    .step-header .instruction { font-size: 14px; color: #aaa; }
+
+    .selection-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      width: 100%;
+    }
+
+    .chip {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      padding: 20px 10px;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 14px;
+      color: #eee;
+    }
+
+    .chip:active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .nav-footer { margin-top: auto; padding-bottom: 20px; text-align: center; width: 100%; }
+    .btn-skip { background: transparent; border: none; color: #444; text-decoration: underline; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Crisis Grid SOS</h1>
+    <div id="locationDisplay" class="location-banner">Staff SOS Portal</div>
+  </header>
+
+  <main class="sos-container">
+    <button class="sos-btn fire" onclick="triggerSOS('fire')">
+      <i>🔥</i>
+      <span>Fire</span>
+    </button>
+    <button class="sos-btn medical" onclick="triggerSOS('medical')">
+      <i>🚑</i>
+      <span>Medical</span>
+    </button>
+    <button class="sos-btn security" onclick="triggerSOS('security')">
+      <i>🛡️</i>
+      <span>Security</span>
+    </button>
+  </main>
+
+  <!-- Pre-Send Confirmation -->
+  <div id="preOverlay">
+    <div class="pre-msg">SENDING <span id="pendingType" style="color:var(--fire)">FIRE</span> ALERT</div>
+    <div class="countdown-circle" id="preCounter">3</div>
+    <button class="btn-cancel-large" onclick="cancelTrigger()">STOP / CANCEL</button>
+  </div>
+
+  <!-- Location Selection -->
+  <div id="overlay">
+    <div class="timer-bar"><div id="timerProgress"></div></div>
+    <div id="stepContainer" style="width:100%"></div>
+    <div class="nav-footer">
+      <button class="btn-skip" onclick="resetUI()">Finished</button>
+    </div>
+  </div>
+
+  <script>
+    const hotelMap = {
+      'Basement': {
+        'Parking': ['P1 Zone', 'P2 Zone', 'P3 Zone'],
+        'Staff Area': ['Laundry', 'Store Room A', 'Store Room B', 'Electrical'],
+      },
+      'Ground': {
+        'Lobby': ['Main Entrance', 'Reception', 'Elevator Bank'],
+        'Food & Bev': ['Main Kitchen', 'Restaurant', 'Bar', 'Lounge'],
+      },
+      'Floor 1': {
+        'Rooms 101-105': ['101', '102', '103', '104', '105'],
+        'Rooms 106-110': ['106', '107', '108', '109', '110'],
+        'Facilities': ['Gym', 'Yoga Studio', 'Staff Room'],
+      },
+      'Floor 2': {
+        'Rooms 201-205': ['201', '202', '203', '204', '205'],
+        'Rooms 206-210': ['206', '207', '208', '209', '210'],
+        'Admin': ['Manager Office', 'Account Section'],
+      },
+      'Rooftop': {
+        'Pool Area': ['Pool Side', 'Changing Room', 'Pump Room'],
+        'Terrace': ['Bar Deck', 'Garden', 'VIP Area'],
+      }
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const roomMode = urlParams.get('room'); 
+    let currentLocation = roomMode || "Mobile Staff";
+    let lastType = null;
+    let selectedFloor = "";
+    let selectedArea = "";
+    let timerInterval = null;
+    let preTimer = null;
+    let currentTriggerId = null;
+
+    if (roomMode) document.getElementById('locationDisplay').textContent = roomMode;
+
+    function triggerSOS(type) {
+      lastType = type;
+      const overlay = document.getElementById('preOverlay');
+      const label = document.getElementById('pendingType');
+      const counter = document.getElementById('preCounter');
+      
+      label.textContent = type.toUpperCase();
+      label.style.color = `var(--${type})`;
+      counter.textContent = "3";
+      overlay.classList.add('active');
+      
+      // Initialize a unique ID for this specific SOS session
+      currentTriggerId = `sos-${Date.now()}`;
+
+      let count = 3;
+      if (window.navigator.vibrate) window.navigator.vibrate([100, 100, 100]);
+      
+      preTimer = setInterval(async () => {
+        count--;
+        counter.textContent = count;
+        if (window.navigator.vibrate) window.navigator.vibrate(50);
+        
+        if (count <= 0) {
+          clearInterval(preTimer);
+          overlay.classList.remove('active');
+          await executeSOS();
+        }
+      }, 1000);
+    }
+
+    function cancelTrigger() {
+      clearInterval(preTimer);
+      document.getElementById('preOverlay').classList.remove('active');
+    }
+
+    async function executeSOS() {
+      await sendSignal(`Emergency ${lastType.toUpperCase()} alert initiated.`);
+      document.getElementById('overlay').classList.add('active');
+      renderFloorStep();
+      startTimer();
+    }
+
+    function startTimer() {
+      let secondsLeft = 45;
+      const progress = document.getElementById('timerProgress');
+      progress.style.width = '100%';
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        secondsLeft--;
+        progress.style.width = `${(secondsLeft / 45) * 100}%`;
+        if (secondsLeft <= 0) resetUI();
+      }, 1000);
+    }
+
+    function renderFloorStep() {
+      const container = document.getElementById('stepContainer');
+      container.innerHTML = `
+        <div class="step-header">
+          <span class="status">HELP IS DISPATCHED</span>
+          <span class="instruction">Which Floor are you on?</span>
+        </div>
+        <div class="selection-grid">
+          ${Object.keys(hotelMap).map(floor => `<div class="chip" onclick="selectFloor('${floor}')">${floor}</div>`).join('')}
+        </div>
+      `;
+    }
+
+    async function selectFloor(floor) {
+      selectedFloor = floor;
+      await sendSignal(`LOCATION UPDATE: ${floor}`);
+      renderAreaStep();
+    }
+
+    function renderAreaStep() {
+      const areas = Object.keys(hotelMap[selectedFloor]);
+      const container = document.getElementById('stepContainer');
+      container.innerHTML = `
+        <div class="step-header">
+          <span class="status">FLOOR: ${selectedFloor.toUpperCase()}</span>
+          <span class="instruction">Select nearest Area</span>
+        </div>
+        <div class="selection-grid">
+          ${areas.map(area => `<div class="chip" onclick="selectArea('${area}')">${area}</div>`).join('')}
+        </div>
+      `;
+    }
+
+    async function selectArea(area) {
+      selectedArea = area;
+      await sendSignal(`LOCATION UPDATE: ${selectedFloor} | Area: ${area}`);
+      renderExactStep();
+    }
+
+    function renderExactStep() {
+      const exacts = hotelMap[selectedFloor][selectedArea];
+      const container = document.getElementById('stepContainer');
+      container.innerHTML = `
+        <div class="step-header">
+          <span class="status">${selectedFloor} > ${selectedArea}</span>
+          <span class="instruction">Exact Location</span>
+        </div>
+        <div class="selection-grid">
+          ${exacts.map(ex => `<div class="chip" onclick="finishSOS('${ex}')">${ex}</div>`).join('')}
+        </div>
+      `;
+    }
+
+    async function finishSOS(exact) {
+      await sendSignal(`LOCATION UPDATE: ${selectedFloor} | Area: ${selectedArea} | Room: ${exact}`);
+      resetUI();
+    }
+
+    async function sendSignal(notes) {
+      try {
+        await fetch('/api/ingest/manual', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            trigger_id: currentTriggerId || `sos-${Date.now()}`,
+            location: currentLocation,
+            trigger_type: `${lastType}_sos`,
+            source: "sos_portal",
+            notes: notes
+          })
+        });
+      } catch (err) { console.error(err); }
+    }
+
+    function resetUI() {
+      clearInterval(timerInterval);
+      document.getElementById('overlay').classList.remove('active');
+    }
+  </script>
+</body>
+</html>

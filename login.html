@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Embedded Crisis Grid</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body class="login-body">
+  <div class="login-card">
+    <div class="login-logo">Crisis Grid</div>
+    <h1>Authentication</h1>
+    <p>Personnel access only. Please sign in to access the command dashboard.</p>
+    
+    <form id="loginForm">
+      <div class="login-field">
+        <label for="username">Operator ID</label>
+        <input type="text" id="username" class="login-input" placeholder="Enter your ID" required autocomplete="username">
+      </div>
+      
+      <div class="login-field">
+        <label for="password">Access Key</label>
+        <input type="password" id="password" class="login-input" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      
+      <button type="submit" class="login-btn">Secure Sign In</button>
+    </form>
+    
+    <div class="login-status" id="systemStatus">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Checking system connectivity...</span>
+    </div>
+  </div>
+
+  <script src="./login.js"></script>
+</body>
+</html>
