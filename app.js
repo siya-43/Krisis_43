@@ -491,6 +491,7 @@ async function wireCctvFeeds() {
       videoEl.srcObject = state.webcamStream;
     } else {
       videoEl.loop = true;
+      const src = resolveVideoSrc(cam.source);
       videoEl.src = cam.source;
       if (!src) {
         if (phEl) phEl.querySelector("span").textContent = "Invalid source";
